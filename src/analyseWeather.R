@@ -56,4 +56,14 @@ awsData %>%
          width=sqrt(2)*10, height=10)
 
 
+# Check for length of stretch of NAs
+as.data.frame.rle <- function(x, ...) do.call(data.frame, x)
+awsNaRuns <- awsData %>%
+  group_by(StationId) %>%
+  do(runs = rle(.$AirTemp)) %>%
+  do(data.frame(StationId = .$StationId,
+                as.data.frame.rle(.$runs))) %>%
+  filter(is.na(values))
+
+
 

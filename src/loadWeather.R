@@ -179,60 +179,6 @@ save.image("./env/weather.RData")
 # variable with missing values and predictor variables as inputs. Have only set
 # up to calculate temperature at the moment.
 
-# Check for length of stretch of NAs
-# as.data.frame.rle <- function(x, ...) do.call(data.frame, x)
-# awsNaRuns <- awsData %>%
-#   group_by(StationId) %>%
-#   do(runs = rle(.$AirTemp)) %>%
-#   do(data.frame(StationId = .$StationId,
-#                 as.data.frame.rle(.$runs))) %>%
-#   filter(is.na(values))
-
-# calcNaRuns <- function(x) {
-#   n <- length(x)
-#   
-#   run.df <- data.frame(value = rep(NA,n),
-#                        length = rep(0,n))
-#   df.idx <- 1
-#   
-#   for (i in 1:n) {
-#     cat(i, "...\n")
-#     value1 <- x[i]
-#     value2 <- x[i+1]
-#     
-#     if (identical(value1, value2)) {
-#       # Increase run length by 1
-#       run.df$value[df.idx] <- value1
-#       run.df$length[df.idx] <- run.df$length[df.idx] + 1
-#     } else {
-#       # End of run. Store and move to next value
-#       run.df$value[df.idx] <- value1
-#       run.df$length[df.idx] <- run.df$length[df.idx] + 1
-#       df.idx <- df.idx + 1
-#     }
-#   }
-#   
-#   run.df <- run.df %>% filter(length!=0)
-#   
-#   return(run.df)
-# }
-# 
-# awsNaRuns <- awsData %>% 
-#   group_by(StationId) %>% 
-#   do(data.frame(StationId = .$StationId,
-#                 runs = calcNaRuns(.$AirTemp))) %>% 
-#   filter(is.na(value))
-# 
-# 
-# awsNaRuns %>%
-#   #filter(lengths!=1) %>%
-#   ggplot(aes(x=lengths)) + 
-#   geom_histogram(binwidth=1) +
-#   facet_wrap(~StationId) +
-#   ggtitle("Histogram of consecutive runs of NAs")
-
-
-
 
 
 
