@@ -60,10 +60,17 @@ awsData %>%
 as.data.frame.rle <- function(x, ...) do.call(data.frame, x)
 awsNaRuns <- awsData %>%
   group_by(StationId) %>%
-  do(runs = rle(.$AirTemp)) %>%
+  mutate(na.test = is.na(AirTemp)) %>% 
+  do(runs = rle(.$na.test)) %>%
   do(data.frame(StationId = .$StationId,
                 as.data.frame.rle(.$runs))) %>%
-  filter(is.na(values))
+  filter(values==TRUE, lengths>1)
+ggplot(awsNaRuns, aes(x=lengths)) +
+  geom_histogram(binwidth=1) +
+  facet_wrap(~StationId, scales="free") +
+  scale_y_sqrt() +
+  ggsave(file.path(plotDir, paste("naRunLength.png")), 
+         width=sqrt(2)*12, height=12)
 
 
 
