@@ -69,8 +69,57 @@ ggplot(awsNaRuns, aes(x=lengths)) +
   geom_histogram(binwidth=1) +
   facet_wrap(~StationId, scales="free") +
   scale_y_sqrt() +
+  ggtitle("NA run lengths.") +
   ggsave(file.path(plotDir, paste("naRunLength.png")), 
          width=sqrt(2)*12, height=12)
 
+
+
+
+
+
+#### Checks =================================================================== 
+
+#Station 68228 has the longest stretch of NAs (about 10 days). First bit of code
+#finds week with most NAs missing. Next bit plots half-hourly and 3-hourly
+#synoptic data. Can see that we are missing values in both.
+awsData %>% 
+  filter(StationId==68228, is.na(AirTemp)) %>% 
+  select(ts, AirTemp) %>% 
+  mutate(ts.YMW = floor_date(ts, "week"))  %>%  
+  group_by(ts.YMW) %>% 
+  summarise(NA.count = n()) %>% 
+  arrange(desc(NA.count))
+
+awsData %>% 
+  filter(StationId==68228, floor_date(ts, "month") == ymd("2003-05-01")) %>% 
+  select(ts, AirTemp) %>% 
+  ggplot(aes(x=ts, y=AirTemp)) +
+  geom_point()
+synopData %>% 
+  filter(StationId==68228, floor_date(ts, "month") == ymd("2003-05-01")) %>% 
+  select(ts, AirTemp) %>% 
+  ggplot(aes(x=ts, y=AirTemp)) +
+  geom_point()
+
+
+
+# TODO (Cameron): Check if there are any cases where a whole day is missing and
+# synoptic data is available.
+
+
+
+
+
+
+
+
+#### Fill NA values ===========================================================
+
+# Filter for data post 2000 only.
+# TODO (Cameron): Go through each station and work out the best starting point.
+# Some have good data earlier than this and some have bad data after this.
+awsData <- awsData %>% 
+  filter(ts >= dmy("1/1/2000"))
 
 
