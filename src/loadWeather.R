@@ -16,10 +16,8 @@ require(zoo)
 awsDir <- "./data/raw/AWS"
 sunDir <- "./data/raw/Daily_Sunshine"
 synopDir <- "./data/raw/Synoptic_data"
-plotDir <- "./plots/aws"
 outputDir <- "./data/tidy"
 
-dir.create(plotDir, F, T)
 dir.create(outputDir, F, T)
 
 
@@ -249,50 +247,9 @@ awsData.imp <- awsData %>%
 
 
 
-# awsData.imp %>%
-#   #filter(floor_date(ts, "month") == dmy("1/4/2004")) %>%
-#   filter(year(ts) == 2004) %>%
-#   ggplot() + 
-#   geom_line(aes(x=ts, y=AirTemp.int), colour="red") +
-#   geom_point(aes(x=ts, y=AirTemp), colour="blue") +
-#   facet_wrap(~StationId)
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-#### Analyse ==================================================================
-stationPlots <- unique(awsData$StationId)
-for (iS in stationPlots) {
-  cat("Outputting plot for station number", iS, "...\n")
-  
-  naTimes <- awsData %>%
-    filter(StationId==iS,
-           is.na(AirTemp))
-  awsData %>%
-    filter(StationId==iS) %>%
-    ggplot(aes(x=ts, y=AirTemp)) + 
-    geom_point() +
-    geom_vline(data = naTimes, aes(xintercept = as.numeric(ts)), colour="red", alpha=0.15) +
-    ggtitle(paste(iS, "half-hourly air temperature data.")) +
-    ggsave(file.path(plotDir, paste0("awsAirTemp", iS, ".png")), width=22, height=12)
-}
-
-
-
-
-#### Output tidy data =========================================================
-awsData %>%
-  write.csv()
