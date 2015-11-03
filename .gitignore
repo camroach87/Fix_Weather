@@ -3,3 +3,7 @@ data/
 .Rhistory
 .Rbuildignore
 *.RData
+
+plots/
+
+Fix_Weather.Rproj

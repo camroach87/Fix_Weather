@@ -15,8 +15,9 @@ require(dygraphs)
 load("./env/weather.RData")
 
 awsData <- awsData %>% 
-  filter(ts >= dmy("1/1/2000"),
-         StationId %in% c(86071, 86077, 86282, 86338, 87031))
+  filter(t >= dmy("1/1/2000"))
+#   filter(ts >= dmy("1/1/2000"),
+#          StationId %in% c(86071, 86077, 86282, 86338, 87031))
   
 
 #### Init =====================================================================
