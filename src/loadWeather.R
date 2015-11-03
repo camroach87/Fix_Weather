@@ -9,6 +9,7 @@ require(lubridate)
 require(stringr)
 require(ggplot2)
 require(zoo)
+require(stringr)
 
 
 
@@ -16,9 +17,8 @@ require(zoo)
 awsDir <- "./data/raw/AWS"
 sunDir <- "./data/raw/Daily_Sunshine"
 synopDir <- "./data/raw/Synoptic_data"
-outputDir <- "./data/tidy"
 
-dir.create(outputDir, F, T)
+dir.create("./env", F, T)
 
 
 #### Load data ================================================================
@@ -76,7 +76,7 @@ for (iF in awsFiles) {
 # awsData <- awsData %>%
 #   filter(StationId==61055)
 
-# add NAs for missing time stamps (if there are any - doesn't look like it)
+# add NAs for missing time stamps
 awsTs <- awsData %>%
   select(StationId, ts) %>%
   group_by(StationId) %>%
@@ -87,6 +87,31 @@ awsTs <- awsData %>%
                 ts = seq(.$tsStart, .$tsEnd, 30*60))) #half-hourly intervals
 awsData <- full_join(awsData, awsTs) %>%
   arrange(StationId, ts)
+
+
+
+
+
+# Load AWS station details
+awsDet <-  read.csv(file.path(awsDir, "HM01X_StnDet_999999998672034.txt"), stringsAsFactors=F, header=F) %>% 
+  select(2:13) %>% 
+  rename(StationId = V2,
+         RainfallDistrict = V3,
+         StationName = V4,
+         OpenDate = V5,
+         CloseDate = V6,
+         Latitude = V7,
+         Longitude = V8,
+         LatLongMethod = V9,
+         Region = V10,
+         StationHeightAboveSea = V11,
+         BaromHeightAboveSea = V12,
+         WMOIndex = V13) %>% 
+  mutate(StationName = str_trim(StationName))
+
+
+
+
 
 
 
@@ -119,6 +144,23 @@ for (iF in sunFiles) {
     select(-c(dc, Year, Month, Day, X.)) %>% 
     bind_rows(sunData)
 }
+
+
+sunDet <-  read.csv(file.path(sunDir, "DC02D_StnDet_999999998672036.txt"), stringsAsFactors=F) %>% 
+  select(2:13) %>% 
+  rename(StationId = Bureau.of.Meteorology.Station.Number,
+         RainfallDistrict = Rainfall.district.code,
+         StationName = Station.Name,
+         OpenDate = Month.Year.site.opened...MM.YYYY.,
+         CloseDate = Month.Year.site.closed...MM.YYYY.,
+         Latitude = Latitude.to.4.decimal.places.in.decimal.degrees,
+         Longitude = Longitude.to.4.decimal.places.in.decimal.degrees,
+         LatLongMethod = Method.by.which.latitude.longitude.was.derived,
+         Region = State,
+         StationHeightAboveSea = Height.of.station.above.mean.sea.level.in.metres,
+         BaromHeightAboveSea = Height.of.barometer.above.mean.sea.level.in.metres,
+         WMOIndex = WMO..World.Meteorological.Organisation..Index.Number) %>% 
+  mutate(StationName = str_trim(StationName))
 
 
 
@@ -166,36 +208,3 @@ for (iF in synopFiles) {
 
 
 save.image("./env/weather.RData")
-
-
-
-
-
-
-
-#### Calculate missing values =================================================
-
-# TODO (Cameron): This might be better written as a function which takes ts, 
-# variable with missing values and predictor variables as inputs. Have only set
-# up to calculate temperature at the moment.
-
-
-
-
-# Imputation of missing data
-awsData.imp <- awsData %>% 
-  group_by(StationId) %>%
-  do(data.frame(.,
-                AirTemp.int = na.approx(.$AirTemp)))
-
-
-
-
-
-
-
-
-
-
-
-
